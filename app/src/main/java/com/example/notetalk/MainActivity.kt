@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -130,6 +132,7 @@ fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) 
         DeleteConfirmationAlertDialog(note, noteToDelete,viewModel)
     }
 
+    val focusManager = LocalFocusManager.current
     Scaffold(
         topBar = { TopAppBar(
             title = {
@@ -147,6 +150,12 @@ fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) 
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
+                .clickable (
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null // disable the ripple effect on click
+                ) {
+                    focusManager.clearFocus() // hide the keyboard when clicking outside
+                }
         ) {
             OutlinedTextField(
                 value = searchQuery,
