@@ -12,11 +12,15 @@ interface INoteRepository {
     fun getNote(id: Int): Flow<Note?>
     suspend fun insertNote(note: Note)
     suspend fun delete(note: Note)
+
+    fun searchNotes(query:String): Flow<List<Note>>
 }
 @Singleton
 class NoteRepository @Inject constructor(
     private val noteDao: NoteDao,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+
+
 ): INoteRepository {
 
     override val allNotes = noteDao.getAllNotes()
@@ -25,7 +29,7 @@ class NoteRepository @Inject constructor(
 
     override suspend fun insertNote(note: Note) {
         withContext(ioDispatcher) {
-            noteDao.insertNote(note.copy(timestamp = System.currentTimeMillis()))
+            noteDao.insertNote(note.copy(lastModified = System.currentTimeMillis()))
         }
     }
 
@@ -33,5 +37,9 @@ class NoteRepository @Inject constructor(
         withContext(ioDispatcher) {
             noteDao.deleteNote(note)
         }
+    }
+
+    override fun searchNotes(query: String): Flow<List<Note>> {
+        return noteDao.searchNotes(query)
     }
 }

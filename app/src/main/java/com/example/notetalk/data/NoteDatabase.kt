@@ -37,6 +37,12 @@ abstract class NoteDatabase: RoomDatabase() {
                         "${System.currentTimeMillis()}")
             }
         }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // no need for any query, we have only change the dao which cause the database integrity issue.
+            }
+        }
     }
 
 }

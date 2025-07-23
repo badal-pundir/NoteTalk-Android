@@ -25,7 +25,7 @@ object AppModule{
             NoteDatabase::class.java,
             "note_database"
         )
-            .addMigrations(NoteDatabase.MIGRATION_1_2)
+            .addMigrations(NoteDatabase.MIGRATION_1_2, NoteDatabase.MIGRATION_2_3)
             .build()
     }
 

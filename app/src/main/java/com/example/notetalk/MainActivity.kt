@@ -4,21 +4,21 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,38 +31,27 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.notetalk.data.FakeNoteDao
-import com.example.notetalk.data.INoteRepository
 import com.example.notetalk.data.Note
-import com.example.notetalk.data.NoteDao
-import com.example.notetalk.data.NoteDatabase
-import com.example.notetalk.data.NoteRepository
 import com.example.notetalk.ui.AddEditNote
-import com.example.notetalk.ui.ConfirmationAlertDialog
+import com.example.notetalk.ui.DeleteConfirmationAlertDialog
 import com.example.notetalk.ui.NoteDetail
 import com.example.notetalk.ui.NoteViewModel
 import com.example.notetalk.ui.theme.NoteTalkTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -133,13 +122,12 @@ fun NotesApp() {
 @Composable
 fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) {
 //    val notes = viewModel.allNotes.collectAsState()
-    val notes by viewModel.allNotes.collectAsState()
-
+    val notes by viewModel.notes.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val noteToDelete = remember { mutableStateOf<Note?>(null) }
-    val noteToEdit = remember { mutableStateOf<Note?>(null) }
 
     noteToDelete.value?.let { note ->
-        ConfirmationAlertDialog(note, noteToDelete,viewModel)
+        DeleteConfirmationAlertDialog(note, noteToDelete,viewModel)
     }
 
     Scaffold(
@@ -155,17 +143,36 @@ fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) 
             }
         }
     ) { paddingValues ->
-        LazyColumn(
-            contentPadding = paddingValues,
+        Column(
             modifier = Modifier
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .fillMaxSize()
         ) {
-            items(notes) { note ->
-                NoteItem(note = note,
-                    onNoteClick = { navController.navigate("viewNote/${note.id}") },
-                    onEditClick = { navController.navigate("addEditNote/${note.id}") },
-                    onDeleteClick = { noteToDelete.value = note }
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = viewModel::onSearchQueryChanged,
+                label = { Text("Search Notes") },
+                singleLine = true,
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            LazyColumn(
+                modifier = Modifier
+//                    .fillMaxSize()
+//                    .padding(top = 8.dp),
+                    .weight(1f),
+                contentPadding = PaddingValues(horizontal = 8.dp),
+            ) {
+                items(notes) { note ->
+                    NoteItem(note = note,
+                        onNoteClick = { navController.navigate("viewNote/${note.id}") },
+                        onEditClick = { navController.navigate("addEditNote/${note.id}") },
+                        onDeleteClick = { noteToDelete.value = note }
                     )
+                }
             }
         }
     }
@@ -175,6 +182,7 @@ private fun formatDate(lastModified: Long): String {
     val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     return sdf.format(Date(lastModified))
 }
+
 @Composable
 fun NoteItem(note: Note, onNoteClick: () -> Unit, onEditClick: () -> Unit, onDeleteClick: () -> Unit) {
     Card(

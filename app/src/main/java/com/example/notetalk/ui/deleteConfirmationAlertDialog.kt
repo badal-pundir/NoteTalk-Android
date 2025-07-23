@@ -10,7 +10,7 @@ import com.example.notetalk.data.Note
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfirmationAlertDialog(note: Note, noteToDelete: MutableState<Note?>, viewModel: NoteViewModel) {
+fun DeleteConfirmationAlertDialog(note: Note, noteToDelete: MutableState<Note?>, viewModel: NoteViewModel) {
 //    val note by viewModel.allNotes.collectAsState()
 //    val noteToDelete = remember { mutableStateOf<Note?>(null) }
 

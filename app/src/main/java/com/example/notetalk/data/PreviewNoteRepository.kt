@@ -16,4 +16,7 @@ class PreviewNoteRepository : INoteRepository {
 
     override suspend fun insertNote(note: Note) { /* Do nothing for preview */ }
     override suspend fun delete(note: Note) { /* Do nothing for preview */ }
+    override fun searchNotes(query: String): Flow<List<Note>> {
+        TODO("Not yet implemented")
+    }
 }

@@ -41,6 +41,10 @@ class FakeNoteDao : NoteDao {
         notesFlow.value = currentNotes
     }
 
+    override fun searchNotes(query: String): Flow<List<Note>> {
+        TODO("Not yet implemented")
+    }
+
     // Companion object to hold the fake data generation function.
     companion object {
         private fun getFakeNotes(): List<Note> {
