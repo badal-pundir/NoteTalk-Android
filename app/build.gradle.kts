@@ -87,4 +87,6 @@ dependencies {
 
     // Jetpack DataStore for saving preferences
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    implementation ("com.google.accompanist:accompanist-navigation-animation:0.35.1-alpha")
 }

@@ -64,7 +64,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,15 +100,23 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NotesApp() {
 
     val navController = rememberNavController()
-
+    // Replacing NavHost with AnimatedNavHost for smooth screen transition.
     NavHost(
         navController = navController,
-        startDestination = "notesList") {
-        composable("notesList") {
+        startDestination = "notesList"
+    ) {
+        composable(
+            route = "notesList",
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+            ) {
             val viewModel: NoteViewModel = hiltViewModel()
             NotesListScreen(
                 viewModel = viewModel,
@@ -115,7 +124,13 @@ fun NotesApp() {
             )
         }
 
-        composable("addEditNote/{noteId}") { navBackStackEntry ->
+        composable(
+            route = "addEditNote/{noteId}",
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+        ) { navBackStackEntry ->
             val viewModel: NoteViewModel = hiltViewModel()
             val noteId = navBackStackEntry.arguments?.getString("noteId")?.toIntOrNull() ?: 0
             AddEditNote(
@@ -125,7 +140,13 @@ fun NotesApp() {
             )
         }
 
-        composable("viewNote/{noteId}") { navBackStackEntry ->
+        composable(
+            route = "viewNote/{noteId}",
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+        ) { navBackStackEntry ->
             val viewModel: NoteViewModel = hiltViewModel()
             val noteId = navBackStackEntry.arguments?.getString("noteId")?.toIntOrNull() ?: 0
             NoteDetail( // in NoteViewScreen
@@ -135,7 +156,12 @@ fun NotesApp() {
             )
         }
 
-        composable("settings") {
+        composable(route = "settings",
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+        ) {
             SettingsScreen(navController = navController)
         }
     }
