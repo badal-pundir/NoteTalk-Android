@@ -84,4 +84,7 @@ dependencies {
 
     // Hilt integration for Jetpack Compose Navigation
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    // Jetpack DataStore for saving preferences
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }

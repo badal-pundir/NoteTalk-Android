@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,10 +50,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.notetalk.data.Note
+import com.example.notetalk.data.Theme
 import com.example.notetalk.ui.AddEditNote
 import com.example.notetalk.ui.DeleteConfirmationAlertDialog
+import com.example.notetalk.ui.MainViewModel
 import com.example.notetalk.ui.NoteDetail
 import com.example.notetalk.ui.NoteViewModel
+import com.example.notetalk.ui.SettingsScreen
 import com.example.notetalk.ui.theme.NoteTalkTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -74,8 +79,18 @@ class MainActivity : ComponentActivity() {
         val viewModel: NoteViewModel by viewModels {
             NoteViewModelFactory(repository)
         }*/
-        setContent {
-            NoteTalkTheme {
+         setContent {
+
+             val mainViewModel: MainViewModel = hiltViewModel()
+             val currentTheme by mainViewModel.theme.collectAsStateWithLifecycle(initialValue = Theme.SYSTEM)
+
+             NoteTalkTheme(
+                 darkTheme = when (currentTheme) {
+                     Theme.LIGHT -> false
+                     Theme.DARK -> true
+                     else -> isSystemInDarkTheme()
+                 }
+             ) {
                 NotesApp()
             }
         }
@@ -86,6 +101,7 @@ class MainActivity : ComponentActivity() {
 fun NotesApp() {
 
     val navController = rememberNavController()
+
     NavHost(
         navController = navController,
         startDestination = "notesList") {
@@ -116,6 +132,10 @@ fun NotesApp() {
                 noteId = noteId
             )
         }
+
+        composable("settings") {
+            SettingsScreen(navController = navController)
+        }
     }
 }
 
@@ -133,10 +153,16 @@ fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) 
     }
 
     val focusManager = LocalFocusManager.current
+
     Scaffold(
         topBar = { TopAppBar(
             title = {
                 Text("MY NOTES", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            },
+            actions = {
+                IconButton(onClick = { navController.navigate("settings")}) {
+                    Icon(Icons.Default.Settings, contentDescription = "Settings")
+                }
             }
         )
                  },
