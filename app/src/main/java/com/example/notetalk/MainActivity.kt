@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -140,7 +142,7 @@ fun NotesApp() {
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) {
 //    val notes = viewModel.allNotes.collectAsState()
@@ -148,8 +150,10 @@ fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) 
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val noteToDelete = remember { mutableStateOf<Note?>(null) }
 
-    noteToDelete.value?.let { note ->
-        DeleteConfirmationAlertDialog(note, noteToDelete,viewModel)
+    AnimatedVisibility(visible = noteToDelete.value != null) {
+        noteToDelete.value?.let { note ->
+            DeleteConfirmationAlertDialog(note, noteToDelete,viewModel)
+        }
     }
 
     val focusManager = LocalFocusManager.current
@@ -201,8 +205,13 @@ fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) 
                     .weight(1f),
                 contentPadding = PaddingValues(horizontal = 8.dp),
             ) {
-                items(notes) { note ->
-                    NoteItem(note = note,
+                items(
+                    notes,
+                    key = { note -> note.id}
+                ) { note ->
+                    NoteItem(
+                        note = note,
+                        modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
                         onNoteClick = { navController.navigate("viewNote/${note.id}") },
                         onEditClick = { navController.navigate("addEditNote/${note.id}") },
                         onDeleteClick = { noteToDelete.value = note }
@@ -219,9 +228,15 @@ private fun formatDate(lastModified: Long): String {
 }
 
 @Composable
-fun NoteItem(note: Note, onNoteClick: () -> Unit, onEditClick: () -> Unit, onDeleteClick: () -> Unit) {
+fun NoteItem(
+    note: Note,
+    modifier: Modifier = Modifier,
+    onNoteClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable(onClick = onNoteClick),
@@ -268,5 +283,5 @@ fun NoteItemPreview() {
         title = "BADAL",
         content = "This is random text"
     )
-    NoteItem(note, {}, {}, {})
+    NoteItem(note, Modifier, {}, {}, {})
 }

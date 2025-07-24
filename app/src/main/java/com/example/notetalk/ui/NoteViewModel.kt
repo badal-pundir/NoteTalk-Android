@@ -54,8 +54,6 @@ class NoteViewModel @Inject constructor(private val noteRepository: INoteReposit
             noteRepository.delete(note)
         }
     }
-
-
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
     }
