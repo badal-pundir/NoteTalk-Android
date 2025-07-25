@@ -66,6 +66,8 @@ import java.util.Date
 import java.util.Locale
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.*
+import com.example.notetalk.ui.LandingScreen
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,8 +110,21 @@ fun NotesApp() {
     // Replacing NavHost with AnimatedNavHost for smooth screen transition.
     NavHost(
         navController = navController,
-        startDestination = "notesList"
+        startDestination = "landing"
     ) {
+        composable(
+            route = "landing",
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+        ) {
+            LandingScreen(onGetStartedClick = {
+                navController.navigate("notesList") {
+                    popUpTo("landing") { inclusive = true }
+                }
+            })
+        }
         composable(
             route = "notesList",
             enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
