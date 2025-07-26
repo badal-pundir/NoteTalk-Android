@@ -9,6 +9,7 @@ NoteTalk is a modern, offline-first note-taking application for Android, built e
 -   **Real-time Search:** Instantly filter notes by title or content.
 -   **Dynamic Theming:** Choose between Light, Dark, and System Default themes.
 -   **Modern UI:** A clean, animated, and user-friendly interface built with Material 3.
+-   ***UI Testing may cause some errors***
 
 ## 📸 Screenshots
 
@@ -44,6 +45,6 @@ The app follows a clean architecture pattern, separating concerns into distinct 
 
 ## 🚀 How to Build
 
-1.  Clone the repository: git clone `git clone https://github.com/badal-pundir/NoteTaking-Android`
+1.  Clone the repository: git clone `git clone https://github.com/badal-pundir/NoteTalk-Android.git`
 2.  Open the project in Android Studio.
 3.  Let Gradle sync and build the project.
