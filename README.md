@@ -16,11 +16,11 @@ NoteTalk is a modern, offline-first note-taking application for Android, built e
 
 | Light Mode                                      
 | ----------------------------------------------- 
-| ![Light Mode Screenshot](https://github.com/badal-pundir/NoteTaking-Android/tree/master/Screenshots/LightTheme)
+| [Light Mode Screenshot](https://github.com/badal-pundir/NoteTaking-Android/tree/master/Screenshots/LightTheme)
 
 | Dark Mode                                      
 | ----------------------------------------------- 
-| ![Dark Mode Screenshot](https://github.com/badal-pundir/NoteTaking-Android/tree/master/Screenshots/DarkTheme)
+| [Dark Mode Screenshot](https://github.com/badal-pundir/NoteTaking-Android/tree/master/Screenshots/DarkTheme)
 
 ## 🛠️ Tech Stack & Architecture
 
