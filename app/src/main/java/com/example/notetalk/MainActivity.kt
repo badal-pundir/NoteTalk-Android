@@ -4,47 +4,42 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -52,22 +47,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.notetalk.data.Note
+import com.example.notetalk.data.PreviewNoteRepository
 import com.example.notetalk.data.Theme
-import com.example.notetalk.ui.AddEditNote
-import com.example.notetalk.ui.DeleteConfirmationAlertDialog
-import com.example.notetalk.ui.MainViewModel
-import com.example.notetalk.ui.NoteDetail
-import com.example.notetalk.ui.NoteViewModel
-import com.example.notetalk.ui.SettingsScreen
+import com.example.notetalk.ui.*
 import com.example.notetalk.ui.theme.NoteTalkTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.*
-import com.example.notetalk.ui.LandingScreen
-
+import java.util.*
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,10 +88,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NotesApp() {
-
     val navController = rememberNavController()
     // Replacing NavHost with AnimatedNavHost for smooth screen transition.
     NavHost(
@@ -183,79 +167,176 @@ fun NotesApp() {
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) {
-//    val notes = viewModel.allNotes.collectAsState()
+    // State from ViewModel
     val notes by viewModel.notes.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
-    val noteToDelete = remember { mutableStateOf<Note?>(null) }
 
-    AnimatedVisibility(visible = noteToDelete.value != null) {
-        noteToDelete.value?.let { note ->
-            DeleteConfirmationAlertDialog(note, noteToDelete,viewModel)
-        }
+    // Local UI state
+    var isGrid by remember { mutableStateOf(true) }
+    val noteToDelete = remember { mutableStateOf<Note?>(null) }
+    var isSearchBarFocused by remember { mutableStateOf(false) }
+
+    // Show confirmation dialog when a note is marked for deletion
+    noteToDelete.value?.let { note ->
+        DeleteConfirmationAlertDialog(
+            note = note,
+            noteToDelete = noteToDelete,
+            viewModel = viewModel
+        )
     }
 
-    val focusManager = LocalFocusManager.current
-
     Scaffold(
-        topBar = { TopAppBar(
-            title = {
-                Text("MY NOTES", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-            },
-            actions = {
-                IconButton(onClick = { navController.navigate("settings")}) {
-                    Icon(Icons.Default.Settings, contentDescription = "Settings")
-                }
-            }
-        )
-                 },
+        topBar = {
+            TopSearchBar(
+                searchQuery = searchQuery,
+                onSearchQueryChanged = viewModel::onSearchQueryChanged,
+                isGrid = isGrid,
+                onToggleLayout = { isGrid = !isGrid },
+                isFocused = isSearchBarFocused,
+                onSearchBarFocusChanged = { isSearchBarFocused = it },
+                onProfileClick = { navController.navigate("settings") }
+            )
+        },
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate("addEditNote/0") }) {
+            FloatingActionButton(
+                onClick = { navController.navigate("addEditNote/0") },
+                shape = RoundedCornerShape(16.dp),
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Note")
             }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .clickable (
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null // disable the ripple effect on click
-                ) {
-                    focusManager.clearFocus() // hide the keyboard when clicking outside
-                }
-        ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = viewModel::onSearchQueryChanged,
-                label = { Text("Search Notes") },
-                singleLine = true,
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+        NotesGrid(
+            notes = notes,
+            isGrid = isGrid,
+            modifier = Modifier.padding(paddingValues),
+            onNoteClick = { noteId -> navController.navigate("viewNote/$noteId") },
+            onEditClick = { noteId -> navController.navigate("addEditNote/$noteId") },
+            onDeleteClick = { note -> noteToDelete.value = note }
+        )
+    }
+}
 
-            LazyColumn(
-                modifier = Modifier
-//                    .fillMaxSize()
-//                    .padding(top = 8.dp),
-                    .weight(1f),
-                contentPadding = PaddingValues(horizontal = 8.dp),
+@Composable
+fun TopSearchBar(
+    searchQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
+    isGrid: Boolean,
+    onToggleLayout:() -> Unit,
+    isFocused: Boolean,
+    onSearchBarFocusChanged: (Boolean) -> Unit,
+    onProfileClick:() -> Unit,
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChanged,
+            placeholder = { Text("Search your notes") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
+            trailingIcon = {
+            if(isFocused && searchQuery.isNotEmpty()) {
+                IconButton(onClick = { onSearchQueryChanged("") } ) {
+                    Icon(
+                        Icons.Default.Clear,
+                        contentDescription = "Clear Search"
+                    )
+                }
+            }
+            else {
+                IconButton(onClick = onToggleLayout) {
+                    Icon(
+                        painter = if (isGrid) painterResource(R.drawable.view_stream_28dp_unfilled)
+                            else painterResource(R.drawable.grid_view_28dp),
+                            contentDescription = "Toggle Layout"
+                        )
+                    }
+                }
+            },
+            shape = RoundedCornerShape(24.dp),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = {
+                focusManager.clearFocus()
+                keyboardController?.hide()
+            }),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+            ),
+            singleLine = true,
+            modifier = Modifier
+                .weight(1f)
+                .onFocusChanged { focusState ->
+                    onSearchBarFocusChanged(focusState.isFocused)
+                },
+        )
+        Spacer(Modifier.width(8.dp))
+        IconButton(onClick = onProfileClick) {
+            Icon(
+                painter = painterResource(R.drawable.person_28dp),
+                contentDescription = "Profile/Settings"
+            )
+        }
+    }
+
+}
+
+//@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun NotesGrid(
+    notes: List<Note>,
+    isGrid: Boolean,
+    modifier: Modifier = Modifier,
+    onNoteClick: (Int) -> Unit,
+    onEditClick: (Int) -> Unit,
+    onDeleteClick: (Note) -> Unit
+) {
+    AnimatedContent(
+        targetState = isGrid,
+        label = "GridToListTransition",
+        transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(300)) }
+    ) { targetIsGrid ->
+        if (targetIsGrid) {
+            LazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Adaptive(minSize = 150.dp),
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp),
+                verticalItemSpacing = 8.dp,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(
-                    notes,
-                    key = { note -> note.id}
-                ) { note ->
-                    NoteItem(
+                items(notes, key = { it.id }) { note ->
+                    NoteCard(
                         note = note,
-                        modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
-                        onNoteClick = { navController.navigate("viewNote/${note.id}") },
-                        onEditClick = { navController.navigate("addEditNote/${note.id}") },
-                        onDeleteClick = { noteToDelete.value = note }
+//                        modifier = Modifier.animateItemPlacement(),
+                        onClick = { onNoteClick(note.id) },
+                        onEditClick = { onEditClick(note.id) },
+                        onDeleteClick = { onDeleteClick(note) }
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(notes, key = { it.id }) { note ->
+                    NoteCard(
+                        note = note,
+//                        modifier = Modifier.animateItemPlacement(),
+                        onClick = { onNoteClick(note.id) },
+                        onEditClick = { onEditClick(note.id) },
+                        onDeleteClick = { onDeleteClick(note) }
                     )
                 }
             }
@@ -263,66 +344,83 @@ fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) 
     }
 }
 
-private fun formatDate(lastModified: Long): String {
-    val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    return sdf.format(Date(lastModified))
-}
-
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun NoteItem(
+fun NoteCard(
     note: Note,
     modifier: Modifier = Modifier,
-    onNoteClick: () -> Unit,
+    onClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable(onClick = onNoteClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = { showMenu = true }
+            ),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
+        Box {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = note.title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
-                Text(text = note.content,
-                    maxLines = 2,
-                    fontSize = 14.sp
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = note.content,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 10
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = formatDate(note.lastModified),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp)
+                    style = MaterialTheme.typography.labelSmall
                 )
             }
-            IconButton(onClick = onEditClick ) {
-                Icon(Icons.Default.Edit, contentDescription = "Edit Note")
-            }
-            IconButton(onClick = onDeleteClick) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete Note")
+            // Dropdown menu for edit and delete
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Edit") },
+                    onClick = {
+                        showMenu = false
+                        onEditClick()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Delete") },
+                    onClick = {
+                        showMenu = false
+                        onDeleteClick()
+                    }
+                )
             }
         }
     }
 }
 
-@Preview(name = "Note Item")
+// Helper function to format the timestamp
+private fun formatDate(timestamp: Long): String {
+    val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    return sdf.format(Date(timestamp))
+}
+
+@Preview(showBackground = true)
 @Composable
-fun NoteItemPreview() {
-    val note = Note(
-        id = 1,
-        title = "BADAL",
-        content = "This is random text"
-    )
-    NoteItem(note, Modifier, {}, {}, {})
+fun NotesListScreenPreview() {
+    NoteTalkTheme {
+        val fakeRepo = remember { PreviewNoteRepository() } // fake repo for preview
+        val viewModel = remember { NoteViewModel(fakeRepo) }
+        val navController = rememberNavController()
+        NotesListScreen(viewModel = viewModel, navController = navController)
+    }
 }
