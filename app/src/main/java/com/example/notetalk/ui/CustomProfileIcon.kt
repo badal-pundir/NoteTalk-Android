@@ -34,7 +34,7 @@ fun ProfileIcon(
     imagePainter: Painter,
     ringColors: List<Color> = colors,
     size: Dp = 40.dp,
-    strokeWidth: Dp = 4.dp
+    strokeWidth: Dp = 4.dp,
 ) {
     Box(
         contentAlignment = Alignment.Center,

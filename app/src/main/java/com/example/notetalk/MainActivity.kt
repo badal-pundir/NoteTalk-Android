@@ -172,6 +172,15 @@ fun NotesApp() {
         ) {
             SettingsScreen(navController = navController)
         }
+
+        composable( route = "EditProfilePicture",
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+        ) {
+            EditProfilePictureScreen(navController = navController)
+        }
     }
 }
 
