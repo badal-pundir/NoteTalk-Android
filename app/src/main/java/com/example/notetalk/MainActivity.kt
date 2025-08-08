@@ -155,6 +155,15 @@ fun NotesApp() {
             )
         }
 
+        composable(route = "profile",
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+        ) {
+            ProfileScreen(navController = navController)
+        }
+
         composable(route = "settings",
             enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
             exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
@@ -196,7 +205,7 @@ fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) 
                 onToggleLayout = { isGrid = !isGrid },
                 isFocused = isSearchBarFocused,
                 onSearchBarFocusChanged = { isSearchBarFocused = it },
-                onProfileClick = { navController.navigate("settings") }
+                onProfileClick = { navController.navigate("profile") }
             )
         },
         floatingActionButton = {
