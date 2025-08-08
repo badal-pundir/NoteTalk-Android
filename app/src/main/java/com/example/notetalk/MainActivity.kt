@@ -280,9 +280,12 @@ fun TopSearchBar(
         )
         Spacer(Modifier.width(8.dp))
         IconButton(onClick = onProfileClick) {
-            Icon(
-                painter = painterResource(R.drawable.person_28dp),
-                contentDescription = "Profile/Settings"
+//            Icon(
+//                painter = painterResource(R.drawable.person_28dp),
+//                contentDescription = "Profile/Settings"
+//            )
+            ProfileIcon(
+                imagePainter = painterResource(R.drawable.user1),
             )
         }
     }

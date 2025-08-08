@@ -32,8 +32,8 @@ val colors = listOf(
 @Composable
 fun ProfileIcon(
     imagePainter: Painter,
-    ringColors: List<Color>,
-    size: Dp = 60.dp,
+    ringColors: List<Color> = colors,
+    size: Dp = 40.dp,
     strokeWidth: Dp = 4.dp
 ) {
     Box(
