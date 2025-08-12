@@ -4,6 +4,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.notetalk.NotesListScreen
+import com.example.notetalk.R
 import com.example.notetalk.ui.NoteViewModel
 import com.example.notetalk.ui.theme.NoteTalkTheme// <-- Use your actual theme name
 import kotlinx.coroutines.flow.Flow
@@ -72,6 +73,6 @@ fun NotesListScreenPreview() {
 
     NoteTalkTheme {
         // 4. Call the actual screen with the fake dependencies
-        NotesListScreen(viewModel = viewModel, navController = navController)
+        NotesListScreen(viewModel = viewModel, navController = navController, R.drawable.person_28dp)
     }
 }

@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -111,6 +111,10 @@ fun ProfileScreen(
 
 @Composable
 private fun ProfileHeader() {
+    val mainViewModel: MainViewModel = hiltViewModel()
+//    val profileViewModel: ProfileViewModel = hiltViewModel()
+    val profiledPictureRes by mainViewModel.profilePicture.collectAsState(initial = R.drawable.person_28dp)
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         /*Image(
             painter = painterResource(R.drawable.user1),
@@ -122,7 +126,7 @@ private fun ProfileHeader() {
                 .background(color = MaterialTheme.colorScheme.surfaceVariant)
             )*/
         ProfileIcon(
-            imagePainter = painterResource(R.drawable.user1),
+            imagePainter = painterResource(profiledPictureRes),
             size = 100.dp
         )
         Spacer(modifier = Modifier.height(12.dp))

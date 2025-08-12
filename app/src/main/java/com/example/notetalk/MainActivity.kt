@@ -91,7 +91,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun NotesApp() {
     val navController = rememberNavController()
-    // Replacing NavHost with AnimatedNavHost for smooth screen transition.
+    val mainViewModel: MainViewModel = hiltViewModel()
+    // collecting the profile picture state
+    val profilePictureRes by mainViewModel.profilePicture.collectAsStateWithLifecycle(R.drawable.person_28dp)
+
+
     NavHost(
         navController = navController,
         startDestination = "landing"
@@ -116,10 +120,11 @@ fun NotesApp() {
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
             ) {
-            val viewModel: NoteViewModel = hiltViewModel()
+            val notesViewModel: NoteViewModel = hiltViewModel()
             NotesListScreen(
-                viewModel = viewModel,
-                navController = navController
+                viewModel = notesViewModel,
+                navController = navController,
+                profilePictureRes = profilePictureRes
             )
         }
 
@@ -179,14 +184,18 @@ fun NotesApp() {
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
         ) {
-            EditProfilePictureScreen(navController = navController)
+            ProfilePictureScreen(navController = navController)
         }
     }
 }
 
 
 @Composable
-fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) {
+fun NotesListScreen(
+    viewModel: NoteViewModel,
+    navController: NavHostController,
+    profilePictureRes: Int)
+{
     // State from ViewModel
     val notes by viewModel.notes.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
@@ -214,6 +223,7 @@ fun NotesListScreen(viewModel: NoteViewModel, navController: NavHostController) 
                 onToggleLayout = { isGrid = !isGrid },
                 isFocused = isSearchBarFocused,
                 onSearchBarFocusChanged = { isSearchBarFocused = it },
+                profilePictureRes = profilePictureRes,
                 onProfileClick = { navController.navigate("profile") }
             )
         },
@@ -245,6 +255,7 @@ fun TopSearchBar(
     onToggleLayout:() -> Unit,
     isFocused: Boolean,
     onSearchBarFocusChanged: (Boolean) -> Unit,
+    profilePictureRes: Int,
     onProfileClick:() -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -303,7 +314,7 @@ fun TopSearchBar(
 //                contentDescription = "Profile/Settings"
 //            )
             ProfileIcon(
-                imagePainter = painterResource(R.drawable.user1),
+                imagePainter = painterResource(profilePictureRes),
             )
         }
     }
@@ -442,6 +453,6 @@ fun NotesListScreenPreview() {
         val fakeRepo = remember { PreviewNoteRepository() } // fake repo for preview
         val viewModel = remember { NoteViewModel(fakeRepo) }
         val navController = rememberNavController()
-        NotesListScreen(viewModel = viewModel, navController = navController)
+        NotesListScreen(viewModel = viewModel, navController = navController, profilePictureRes = R.drawable.person_28dp)
     }
 }

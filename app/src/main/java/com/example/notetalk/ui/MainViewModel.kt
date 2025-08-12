@@ -11,4 +11,5 @@ class MainViewModel @Inject constructor(
     settingsManager: SettingsManager,
 ) : ViewModel(){
     val theme = settingsManager.themeFlow
+    val profilePicture = settingsManager.profilePictureFlow
 }
