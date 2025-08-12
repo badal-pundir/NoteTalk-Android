@@ -10,7 +10,12 @@ NoteTalk is a modern, offline-first note-taking application for Android, built e
 -   **Dynamic Theming:** Choose between Light, Dark, and System Default themes.
 -   **Modern UI:** A clean, animated, and user-friendly interface built with Material 3.
 
-## 📸 Screenshots
+## 📸 Screenshots(Updated Version)
+| Light Mode                                      
+| ----------------------------------------------- 
+| [Light Mode Screenshot](https://github.com/badal-pundir/NoteTalk-Android/tree/master/Screenshots/NewLightTheme)
+
+## 📸 Screenshots(Older Version)
 | Light Mode                                      
 | ----------------------------------------------- 
 | [Light Mode Screenshot](https://github.com/badal-pundir/NoteTaking-Android/tree/master/Screenshots/LightTheme)
