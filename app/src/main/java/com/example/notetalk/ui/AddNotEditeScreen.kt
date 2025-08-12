@@ -17,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,8 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.notetalk.data.Note
@@ -106,20 +111,48 @@ fun AddEditNote(viewModel: NoteViewModel, navController: NavHostController, note
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .padding(16.dp)
+                    .padding(8.dp)
                     .fillMaxSize()
             ) {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Title") },
-                    modifier = Modifier.fillMaxWidth()
+                    placeholder = {
+                        Text(
+                            text = "Title",
+                            fontSize = 24.sp,
+                            color = Color.LightGray,
+                        )
+                    },
+                    textStyle = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    ),
+//                    label = { Text("Title") },
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
                 )
-                Spacer(modifier = Modifier.padding(16.dp))
                 OutlinedTextField(
                     value = content,
                     onValueChange = { content = it },
-                    label = { Text("Content") },
+                    placeholder = { Text("Note", color = Color.LightGray) },
+                    textStyle = TextStyle(
+                        fontSize = 16.sp
+                    ),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        // You might also want to set the background to transparent
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent
+                    ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
