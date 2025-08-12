@@ -263,6 +263,7 @@ fun TopSearchBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .statusBarsPadding()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -340,7 +341,6 @@ fun NotesGrid(
             LazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Adaptive(minSize = 150.dp),
                 modifier = modifier
-                    .fillMaxSize()
                     .padding(horizontal = 8.dp),
                 verticalItemSpacing = 8.dp,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -358,7 +358,6 @@ fun NotesGrid(
         } else {
             LazyColumn(
                 modifier = modifier
-                    .fillMaxSize()
                     .padding(horizontal = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
